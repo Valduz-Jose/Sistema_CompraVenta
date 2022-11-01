@@ -1,0 +1,401 @@
+#include<iostream>
+#include<fstream>
+#include <cstdlib>
+#include <string>
+#include <sstream>
+#include <iomanip>
+#include <windows.h>
+#include <time.h>
+#include <conio.h>
+using namespace std;
+
+string strings[200];
+
+void AltEnter();
+int len(string);
+void split(string,char);
+void crearFactura();
+void VerFacturas();
+void IngresarProducto();
+void Inventario();
+int menu();
+ 
+void AltEnter(){
+    keybd_event(VK_MENU,
+                0x38,
+                0,
+                0);
+    keybd_event(VK_RETURN,
+                0x1c,
+                0,
+                0);
+    keybd_event(VK_RETURN,
+                0x1c,
+                KEYEVENTF_KEYUP,
+                0);
+    keybd_event(VK_MENU,
+                0x38,
+                KEYEVENTF_KEYUP,
+                0);
+    return;
+} 
+
+int len(string str)  {  
+    int length = 0;  
+    for (int i = 0; str[i] != '\0'; i++)  
+    {  
+        length++;  
+          
+    }  
+    return length;     
+}  
+
+void split (string str, char seperator)  {  
+    int currIndex = 0, i = 0;  
+    int startIndex = 0, endIndex = 0;  
+    while (i <= len(str))  
+    {  
+        if (str[i] == seperator || i == len(str))  
+        {  
+            endIndex = i;  
+            string subStr = "";  
+            subStr.append(str, startIndex, endIndex - startIndex);  
+            strings[currIndex] = subStr;  
+            currIndex += 1;  
+            startIndex = endIndex + 1;  
+        }  
+        i++;  
+        }     
+} 
+
+void crearFactura(){
+	string name,cedula,direc,precioletras,descripcion,disponibles,codPro;
+	int opcion=1,cantidad=1,precio=1,total=0,disponiblesN,a=-1,totalfinal=0;
+	
+	string list[150];
+	system("cls");
+	cout<<endl<<endl<<setw(72)<<"---Zapateria Shalom---"<<right<<endl<<endl;
+	cout<<setw(48)<<"- "<<left;
+	cout<<"Nombre y Apellido: "<<right;
+	cin.ignore();
+	getline(cin,name);
+	cout<<setw(48)<<"- "<<left;
+	cout<<"Cedula: "<<right;
+	cin>>cedula;
+	cout<<setw(48)<<"- "<<left;
+	cout<<"Direccion: "<<right;
+	cin.ignore();
+	getline(cin,direc);
+	while(opcion==1){
+		string NuevaCadena;
+		cout<<setw(48)<<"- "<<left;
+		cout<<"Codigo Producto: "<<right;
+		fflush(stdin);
+		cin>>codPro; fflush(stdin);
+		cout<<setw(48)<<"- "<<left;
+		cout<<"Cantidad de items de este Producto: "<<right;
+		cin>>cantidad;
+		
+		ifstream archivLect("inventario.txt");
+		string codigo,finalline,totall,cantidadaux;
+		while (getline(archivLect,codigo,'/')){
+			if(codigo.compare(codPro)==0){
+				stringstream sss;
+				stringstream dis;
+				stringstream aux;
+				stringstream auxi;
+				
+				getline(archivLect,codigo,'-');
+				descripcion=codigo;
+				getline(archivLect,codigo,'-');
+				disponibles=codigo;
+				getline(archivLect,codigo,'-');
+				precioletras=codigo;
+				dis<<disponibles;
+				dis>>disponiblesN;
+				if(disponiblesN>0 && disponiblesN>cantidad){
+					sss<<precioletras;
+					sss>>precio;
+					total=(precio*cantidad);
+					totalfinal=totalfinal+total;
+					cout<<setw(38)<<"- "<<left;	
+					cout<<"Descripcion "<<descripcion<<" Disponibles "<<(disponiblesN-cantidad)<<" Precio Unitario "<<precioletras<<right<<endl;
+					aux<<total;
+					aux>>totall;
+					auxi<<cantidad;
+					auxi>>cantidadaux;
+					list[a+1]=cantidadaux+"x Bs "+precioletras+"\t"+descripcion+"     Bs "+totall+"\n";
+					a++;
+				}else{
+					cout<<setw(48)<<"- "<<left;
+					cout<<"No hay Suficientes en Inventario"<<endl;
+				}
+				archivLect.close();
+			}else if(archivLect.eof()){
+				cout<<setw(38)<<"- "<<left;	
+				cout<<"Este Codigo no esta registrado en Inventario porfavor verifiquelo"<<endl;
+			}
+		}
+		archivLect.close();
+		ifstream archivLecto("inventario.txt");
+		string codigo2,disfinlet;
+		int disponiblesFinal,cont=1;
+		while (getline(archivLecto,codigo2,'/')){
+			if(codigo2.compare(codPro)==0){
+				disponiblesFinal=disponiblesN-cantidad;
+				stringstream dis;
+				dis<<disponiblesFinal;
+				dis>>disfinlet;
+				NuevaCadena = NuevaCadena+"/"+codPro+"/"+descripcion+"-"+disfinlet+"-"+precioletras+"-"+"\n";
+				getline(archivLecto,codigo2,'/');
+			}else if(cont>1){
+				NuevaCadena = NuevaCadena+"/"+codigo2;
+			}
+			cont++;
+		}
+		archivLecto.close();
+		ofstream archivo("inventario.txt", ios::trunc);
+    	archivo<<NuevaCadena;
+		cout<<"1 = Anadir otro Producto: ";
+    	cin>>opcion;
+	}
+	system("cls");
+	string facture,totalfinal2,compra;
+	facture=string("--------------------------------------------\n")+"RIF/C.I: "+cedula+"\n"+"RAZON SOCIAL: "+name+"\n"+"DIRECCION: "+direc+"\n";
+	stringstream auxi2;
+	auxi2<<totalfinal;
+	auxi2>>totalfinal2;
+	cout<<setw(58)<<" "<<left;
+	cout<<"SENIAT \n"<<right;
+	cout<<setw(53)<<" "<<left;
+	cout<<"RIF V-26841447 \n"<<right;
+	cout<<setw(48)<<" "<<left;
+	cout<<"JOSE ALEJANDRO VALDUZ CONTRERAS \n"<<right;
+	cout<<setw(53)<<" "<<left;
+	cout<<"ZAPATERIA SHALOM \n"<<right;
+	cout<<setw(50)<<" "<<left;
+	cout<<"AV 18 ENTRE CALLES 12 Y 13 \n"<<right;
+	cout<<setw(51)<<" "<<left;
+	cout<<"NRO 10 SECTOR LAS MARIAS \n"<<right;
+	cout<<setw(48)<<" "<<left;
+	cout<<"ESTADO TACHIRA ZONA POSTAL 5030 \n"<<right;
+	cout<<setw(48)<<" "<<left;
+	cout<<"----------------------------------\n"<<right;
+	cout<<setw(48)<<" "<<left;
+	cout<<"RIF/C.I: "+cedula+"\n"<<right;
+	cout<<setw(48)<<" "<<left;
+	cout<<"RAZON SOCIAL: "+name+"\n"<<right;
+	cout<<setw(48)<<" "<<left;
+	cout<<"DIRECCION: "+direc+"\n"<<right;
+	
+	for(int i=0; i<=a+1;i++){
+		compra=compra+list[i];
+		cout<<setw(48)<<" "<<left;
+		cout<<list[i]<<right;	
+	}
+	facture=facture+compra;
+	facture=facture+"Total a Pagar: "+totalfinal2+"\n"+"--------------------------------------------\n";
+	
+	cout<<endl<<setw(48)<<" "<<left;
+	cout<<"Total a Pagar: "+totalfinal2<<right<<endl;
+	
+	//Copio en el archivo de facturas
+	ofstream archivo("facturas.txt", ios::app);
+    if(archivo.fail())
+    cerr << "Error al abrir el archivo Pruebas.txt" << endl;
+    else{
+    	archivo<<facture;
+	}
+	cin.get();
+	system("PAUSE");
+}
+
+void VerFacturas(){
+	
+	system("cls");
+	ifstream archivo("facturas.txt");
+    char linea[128];
+
+    if(archivo.fail())
+    cerr << "Error al abrir el archivo Pruebas.txt" << endl;
+    else{
+    	
+    	while(!archivo.eof())
+	    {
+	        archivo.getline(linea, sizeof(linea));
+	        cout<<setw(48)<<" "<<left;
+	        cout << linea <<right<< endl;
+	    }
+	    cout<<"FACTURAS AL ";
+    	//Fecha y Hora
+		time_t t = time(NULL);
+		struct tm tiempoLocal = *localtime(&t);
+		// El lugar en donde se pondrá la fecha y hora formateadas
+		char fechaHora[70];
+		// El formato. Mira más en https://en.cppreference.com/w/c/chrono/strftime
+		char *formato = "%Y-%m-%d %H:%M:%S";
+		// Intentar formatear
+		int bytesEscritos =
+		strftime(fechaHora, sizeof fechaHora, formato, &tiempoLocal);
+		if (bytesEscritos != 0) {
+			// Si no hay error, los bytesEscritos no son 0
+			cout<<fechaHora<<endl<<"--------------------------------------------\n";
+		} else {
+			cout<<"Error formateando fecha";
+		}
+		//
+	    cin.ignore();
+	    cin.get();	
+	}
+	archivo.close();
+}
+
+void IngresarProducto(){
+	
+	system("cls");
+	string modelo;
+	int opcion=1,cantidad,precio,codProd;
+	while(opcion==1){
+		fflush(stdin);
+		int cont=0;
+		ofstream archivo("inventario.txt", ios::app);
+		cout<<setw(48)<<" "<<left;
+		cout<<"Modelo a Ingresar: "<<right;
+		
+		getline(cin,modelo);
+		cout<<setw(48)<<" "<<left;
+		fflush(stdin);
+	    cout<<"Cantidad que Ingresa: "<<right;
+	    cin>>cantidad;
+	    cout<<setw(48)<<" "<<left;
+	    cout<<"Precio Unitario: "<<right;
+	    cin>>precio;
+	    
+	    ifstream archivLect("inventario.txt");
+		string linea,finalline;
+		while (getline(archivLect,linea)){
+			cont++;
+		}
+		archivLect.close();
+		stringstream ss;
+		ss<<finalline;
+		ss>>codProd;
+		codProd=cont+1;
+		//
+		
+		//
+	    archivo  << "/000" << codProd << "/" << modelo <<"-"<< cantidad << "-"<< precio <<"-"<< endl;
+		cout<<setw(48)<<" "<<left;
+		cout<<char(0252)<<" Correcto"<<endl;
+		cout<<setw(48)<<" "<<left;
+	    cout<<"1 = Ingresar otro Modelo: "<<right;
+	    cin>>opcion;
+	    archivo.close();
+		
+	}
+}
+
+void Inventario(){
+	system("cls");
+    ifstream archivo("inventario.txt");
+    string linea=" ";
+    int v=0;
+    if(archivo.fail())
+    cerr << "Error al abrir el archivo Pruebas.txt" << endl;
+    else{
+    	cout<<setw(10)<<" "<<left;
+    	cout<<"Codigo_Producto"<<right;
+    	cout<<setw(10)<<" "<<left;
+		cout<<"Modelo"<<right;
+		cout<<setw(12)<<" "<<left;
+		cout<<"Cantidad"<<right;
+		cout<<setw(10)<<" "<<left;
+		cout<<"Precio"<<right<<endl;
+		int espacio;
+		strings[0]=" ";
+		strings[1]=" ";
+		strings[2]=" ";
+    	while(getline(archivo,linea,'/'))
+	    {
+	    	if(v==0){
+	    		split(linea,'-');
+	    		espacio=28-strings[0].length();
+				cout<<setw(espacio)<<right<<" ";
+	    		cout<<left<<strings[0];
+	    		
+	    		espacio=18-strings[1].length();
+				cout<<setw(espacio)<<right<<" ";
+	    		cout<<left<<strings[1];
+	    		
+	    		espacio=15-strings[2].length();
+				cout<<setw(espacio)<<right<<" ";
+	    		cout<<left<<strings[2]<<endl;
+				v=1;	
+			}else{
+				cout<<setw(10)<<" "<<right;
+				cout<<linea<<left;
+				v=0;
+			}
+	    	
+		}
+	    cin.get();
+	    cin.get();	
+	    archivo.close();
+	}
+    
+	
+}
+
+int menu(){
+	system("cls");
+	char opcion;
+	
+	cout<<endl<<endl<<setw(72)<<right<<"Zapateria Shalom"<<right<<endl<<endl;
+	cout<<setw(48)<<"1) "<<left;
+	cout<<"Crear Nueva Factura"<<endl<<right;
+	cout<<setw(48)<<"2) "<<left;
+	cout<<"Ver Facturas"<<endl<<right;
+	cout<<setw(48)<<"3) "<<left;
+	cout<<"Ingresar Producto"<<endl<<right;
+	cout<<setw(48)<<"4) "<<left;
+	cout<<"Ver Inventario"<<endl<<right;
+	cout<<setw(48)<<"5) "<<left;
+	cout<<"Salir"<<endl<<right;
+	
+
+	opcion=getch();
+
+	switch(opcion){
+		case 49:
+			crearFactura();
+			break;
+		case 50:
+			VerFacturas();
+			break;
+		case 51:
+			IngresarProducto();
+			break;
+		case 52:
+			Inventario();
+			break;
+		case 53:
+			return 0;
+			break;
+		default:
+			system("cls");
+			cout<<"Opcion No Valida"<<endl;
+			cin.get();
+			break;
+	}
+	
+}
+
+int main(){
+	system("color 1f");
+	AltEnter();
+	while(menu()){
+	}
+	return 0;
+}
+
+
